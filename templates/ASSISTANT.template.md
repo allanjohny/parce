@@ -52,6 +52,19 @@ This regenerates `memory/graph.json` + `memory/brain.html` and patches a `## Rel
 
 To search memory by keyword: `node skills/brain/brain-query.mjs <terms> [--top=N] [--type=feedback]`.
 
+## Knowledge base structure
+
+Beyond `memory/`, this repo has four knowledge folders you maintain:
+
+- `rules/` — always-on working rules (coding style, security, testing, agent usage). Follow them in every task; suggest edits when {{USER_NAME}}'s feedback contradicts them.
+- `contexts/` — switchable modes ({{USER_NAME}} says "dev mode" / "review mode" → load the matching file and adopt its behavior).
+- `projects/` — one doc per project {{USER_NAME}} works on, indexed in `projects/_index.md`. When a new repo shows up in conversation, add a row.
+- `decisions/` — ADRs (architecture decision records) in `decisions/_index.md`. Before closing a large change, check the diff against relevant ADRs; when {{USER_NAME}} makes a hard-to-reverse decision, record it.
+
+## Skills
+
+Reusable procedures live in `skills/` (each with a `SKILL.md`): `brain` (rebuild the memory graph), `healthcheck` (self-diagnostic), `dev-local` (run projects safely on a multi-project machine), `ultra-mode` (compressed communication), `logo-designer`, `background-remove`, `graphify-onboard.sh` (code graphs). Use them when their trigger phrases match.
+
 ## Working style (starter defaults — {{USER_NAME}} will shape these over time)
 
 - Prefer surgical, minimal diffs. No speculative abstraction.

@@ -4,6 +4,8 @@
 
 *Parce* (from the Colombian slang *parce* = buddy, partner) is a template, not a product. You clone it, run one setup script, give your assistant a name, and from that moment it starts learning about you: who you are, the repos and orgs you work on, how you like things done. Everything lives in plain Markdown files you own, inside a git repo you control.
 
+![Your assistant's brain — an interactive knowledge graph of everything it has learned](docs/assets/brain.png)
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  parce/                                             │
@@ -13,7 +15,11 @@
 │  │     ▲ .github/copilot-instructions.md (symlink)  │
 │  ├── memory/           ← one fact per file          │
 │  │     └── brain.html  ← navigable knowledge graph  │
-│  └── skills/           ← brain rebuild, graphify    │
+│  ├── rules/            ← always-on working rules    │
+│  ├── contexts/         ← switchable modes           │
+│  ├── projects/         ← map of what you work on    │
+│  ├── decisions/        ← ADRs worth remembering     │
+│  └── skills/           ← reusable procedures        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -76,6 +82,31 @@ Query it from the terminal:
 ```bash
 node skills/brain/brain-query.mjs deploy docker --top=5
 ```
+
+## The knowledge base
+
+Memory is for facts; four folders hold the structured knowledge:
+
+| Folder | What lives there |
+|---|---|
+| `rules/` | Always-on working rules: coding style, security checklist, testing requirements, when to use subagents. Edit them to match *your* standards. |
+| `contexts/` | Switchable modes — say "dev mode" or "review mode" and the assistant adopts that behavior profile. |
+| `projects/` | A living map of every repo/project you work on ([projects/_index.md](projects/_index.md)); the assistant adds rows as it learns what you touch. |
+| `decisions/` | Architecture Decision Records — decisions you don't want re-litigated or accidentally reversed ([decisions/_index.md](decisions/_index.md)). |
+
+## Skills included
+
+| Skill | What it does |
+|---|---|
+| [`brain`](skills/brain/SKILL.md) | Rebuilds the memory knowledge graph + interactive mind map |
+| [`healthcheck`](skills/healthcheck/SKILL.md) | "Are you active?" — self-diagnostic of memory, structure, and symlinks |
+| [`dev-local`](skills/dev-local/SKILL.md) | Run any project locally on a multi-project machine without port collisions (never `pkill` again) |
+| [`ultra-mode`](skills/ultra-mode/SKILL.md) | Ultra-compressed communication — ~75% fewer tokens, zero lost precision |
+| [`logo-designer`](skills/logo-designer/SKILL.md) | Design and iterate on SVG logos |
+| [`background-remove`](skills/background-remove/SKILL.md) | Remove image backgrounds locally with rembg |
+| [`graphify-onboard.sh`](skills/graphify-onboard.sh) | Equip any repo with a typed code graph via MCP |
+
+Skills are just Markdown with a frontmatter description — write your own by copying any of these.
 
 ## Code graphs (optional)
 
