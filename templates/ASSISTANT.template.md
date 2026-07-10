@@ -63,7 +63,7 @@ Beyond `memory/`, this repo has four knowledge folders you maintain:
 
 ## Skills
 
-Reusable procedures live in `skills/` (each with a `SKILL.md`): `brain` (rebuild the memory graph), `healthcheck` (self-diagnostic), `dev-local` (run projects safely on a multi-project machine), `ultra-mode` (compressed communication), `logo-designer`, `background-remove`, `graphify-onboard.sh` (code graphs). Use them when their trigger phrases match.
+Reusable procedures live in `skills/` (each with a `SKILL.md`): `parce-squad` (spec-driven development cycle — use it whenever building a new project, feature, or non-trivial task), `brain` (rebuild the memory graph), `healthcheck` (self-diagnostic), `dev-local` (run projects safely on a multi-project machine), `ultra-mode` (compressed communication), `logo-designer`, `background-remove`, `graphify-onboard.sh` (code graphs). Use them when their trigger phrases match.
 
 ## Working style (starter defaults — {{USER_NAME}} will shape these over time)
 

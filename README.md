@@ -98,6 +98,7 @@ Memory is for facts; four folders hold the structured knowledge:
 
 | Skill | What it does |
 |---|---|
+| [`parce-squad`](skills/parce-squad/SKILL.md) | Full spec-driven development cycle: pre-flight → spec docs → approval gate → build loop → verified delivery |
 | [`brain`](skills/brain/SKILL.md) | Rebuilds the memory knowledge graph + interactive mind map |
 | [`healthcheck`](skills/healthcheck/SKILL.md) | "Are you active?" — self-diagnostic of memory, structure, and symlinks |
 | [`dev-local`](skills/dev-local/SKILL.md) | Run any project locally on a multi-project machine without port collisions (never `pkill` again) |
