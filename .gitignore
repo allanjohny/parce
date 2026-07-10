@@ -1,0 +1,19 @@
+# Generated per-user by setup.sh — each person's assistant is their own
+ASSISTANT.md
+CLAUDE.md
+AGENTS.md
+.github/copilot-instructions.md
+
+# Personal memories never belong in the shared template.
+# (If you fork this as YOUR private assistant repo, remove these lines —
+#  versioning your memories is the whole point.)
+memory/*.md
+!memory/MEMORY.md
+!memory/_template.md
+memory/graph.json
+memory/brain.html
+
+# Brain/graph artifacts
+graphify-out/
+
+.DS_Store

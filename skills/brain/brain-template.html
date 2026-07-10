@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brain</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#header{background:#161b22;border-bottom:1px solid #30363d;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+#header h1{font-size:16px;font-weight:600;white-space:nowrap}
+#search{flex:1;max-width:280px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 10px;color:#c9d1d9;font-size:13px;outline:none}
+#search:focus{border-color:#58a6ff}
+#filters{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+#filters label{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;white-space:nowrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+#main{display:flex;flex:1;overflow:hidden}
+#graph{flex:1}
+#panel{width:340px;background:#161b22;border-left:1px solid #30363d;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#panel-header{padding:12px 16px;border-bottom:1px solid #30363d;font-size:13px;font-weight:600;color:#8b949e;min-height:44px;display:flex;align-items:center}
+#panel-meta{padding:8px 16px;border-bottom:1px solid #30363d;font-size:11px;color:#8b949e}
+#panel-body{flex:1;overflow-y:auto;padding:16px;font-size:12px;line-height:1.65}
+#panel-body h1,#panel-body h2,#panel-body h3{font-size:13px;color:#58a6ff;margin:12px 0 4px;border:none}
+#panel-body p{margin-bottom:8px}
+#panel-body code{background:#0d1117;padding:1px 4px;border-radius:3px;font-size:11px;font-family:Consolas,monospace}
+#panel-body pre{background:#0d1117;padding:8px;border-radius:6px;overflow-x:auto;margin:8px 0}
+#panel-body pre code{background:none;padding:0}
+#panel-body ul,#panel-body ol{padding-left:16px;margin-bottom:8px}
+#panel-body li{margin-bottom:2px}
+#panel-body a{color:#58a6ff}
+#panel-body strong{color:#e6edf3}
+#panel-body blockquote{border-left:3px solid #30363d;padding-left:10px;color:#8b949e;margin:8px 0}
+#panel-body hr{border:none;border-top:1px solid #30363d;margin:10px 0}
+#panel-body table{border-collapse:collapse;width:100%;margin:8px 0;font-size:11px}
+#panel-body th,#panel-body td{border:1px solid #30363d;padding:4px 8px}
+#panel-body th{background:#21262d}
+#panel-related{padding:10px 16px;border-top:1px solid #30363d;font-size:11px}
+#panel-related h4{color:#8b949e;margin-bottom:6px;font-size:11px;font-weight:600}
+.rel-item{display:flex;justify-content:space-between;padding:4px 6px;cursor:pointer;color:#58a6ff;border-radius:4px}
+.rel-item:hover{background:#21262d;color:#79c0ff}
+.rel-weight{color:#8b949e;font-size:10px}
+#footer{background:#161b22;border-top:1px solid #30363d;padding:6px 16px;font-size:11px;color:#8b949e;display:flex;align-items:center;gap:16px;flex-shrink:0}
+#legend{display:flex;gap:10px}
+#legend span{display:flex;align-items:center;gap:4px}
+#empty-hint{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#484f58;font-size:12px;gap:8px;text-align:center;padding:24px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="header">
+  <h1>&#129504; Brain</h1>
+  <input id="search" type="text" placeholder="Search memory..." autocomplete="off">
+  <div id="filters">
+    <label><input type="checkbox" data-type="project" checked> <span class="dot" style="background:#4CAF50"></span> Project</label>
+    <label><input type="checkbox" data-type="feedback" checked> <span class="dot" style="background:#F44336"></span> Feedback</label>
+    <label><input type="checkbox" data-type="user" checked> <span class="dot" style="background:#2196F3"></span> User</label>
+    <label><input type="checkbox" data-type="reference" checked> <span class="dot" style="background:#9E9E9E"></span> Reference</label>
+    <label><input type="checkbox" data-type="unknown" checked> <span class="dot" style="background:#FF9800"></span> Other</label>
+  </div>
+</div>
+<div id="main">
+  <div id="graph"></div>
+  <div id="panel">
+    <div id="panel-header"><span id="panel-title">Select a node</span></div>
+    <div id="panel-meta" style="display:none"></div>
+    <div id="panel-body">
+      <div id="empty-hint">
+        <p style="font-size:40px">&#129504;</p>
+        <p>Click a node to explore the memory</p>
+        <p style="font-size:10px;color:#30363d">Drag . Scroll to zoom . Search above</p>
+      </div>
+    </div>
+    <div id="panel-related" style="display:none">
+      <h4>&#9889; Strongest synapses</h4>
+      <div id="related-list"></div>
+    </div>
+  </div>
+</div>
+<div id="footer">
+  <span id="stats"></span>
+  <div id="legend">
+    <span><span class="dot" style="background:#4CAF50"></span>Project</span>
+    <span><span class="dot" style="background:#F44336"></span>Feedback</span>
+    <span><span class="dot" style="background:#2196F3"></span>User</span>
+    <span><span class="dot" style="background:#9E9E9E"></span>Reference</span>
+  </div>
+</div>
+<script src="https://unpkg.com/vis-network@9.1.9/dist/vis-network.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+var DATA = /*{{GRAPH_DATA}}*/;
+
+var TYPE_COLOR = {
+  project:   {background:"#1b4332",border:"#4CAF50",highlight:{background:"#2d6a4f",border:"#81c784"}},
+  feedback:  {background:"#4a1f1f",border:"#F44336",highlight:{background:"#7b2d2d",border:"#ef9a9a"}},
+  user:      {background:"#1a3052",border:"#2196F3",highlight:{background:"#2c4d7a",border:"#90caf9"}},
+  reference: {background:"#2a2a2a",border:"#9E9E9E",highlight:{background:"#3d3d3d",border:"#cfcfcf"}},
+  unknown:   {background:"#3d2a00",border:"#FF9800",highlight:{background:"#5c4000",border:"#ffcc80"}},
+};
+
+var nodeMap = new Map(DATA.nodes.map(function(n){return [n.id, n];}));
+
+var visNodeDefs = DATA.nodes.map(function(n) {
+  var lbl = n.title || n.id;
+  if (lbl.length > 22) lbl = lbl.slice(0, 20) + "...";
+  return {
+    id: n.id, label: lbl,
+    title: (n.title||n.id) + "\nType: " + n.type + "\nTags: " + (n.tags||[]).join(", ") + "\nConnections: " + n.degree,
+    color: TYPE_COLOR[n.type] || TYPE_COLOR.unknown,
+    size: Math.round(15 + n.centrality * 32),
+    font: {size: Math.round(10 + n.centrality * 5), color: "#c9d1d9"},
+    borderWidth: 2, _type: n.type
+  };
+});
+
+var visEdgeDefs = DATA.edges.map(function(e, i) {
+  return {id: i, from: e.from, to: e.to,
+    width: Math.max(0.5, e.weight * 4),
+    color: {color: "#444c56", opacity: 0.25 + e.weight * 0.55}};
+});
+
+var nodes   = new vis.DataSet(visNodeDefs);
+var edges   = new vis.DataSet(visEdgeDefs);
+var network = new vis.Network(
+  document.getElementById("graph"),
+  {nodes: nodes, edges: edges},
+  {
+    nodes: {shape: "dot"},
+    edges: {smooth: {type: "continuous", roundness: 0.3}, selectionWidth: 2},
+    physics: {
+      forceAtlas2Based: {gravitationalConstant:-80,centralGravity:0.005,springLength:220,springConstant:0.06,damping:0.9,avoidOverlap:0.4},
+      maxVelocity: 60, solver: "forceAtlas2Based",
+      stabilization: {iterations: 200, updateInterval: 25}
+    },
+    interaction: {hover: true, tooltipDelay: 300, keyboard: true},
+    layout: {improvedLayout: false}
+  }
+);
+
+var s = DATA.stats;
+document.getElementById("stats").textContent =
+  s.nodes + " memories . " + s.edges + " synapses . avg weight " + s.avg_weight + " . " + DATA.generated_at.slice(0,10);
+
+function clearEl(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+function renderMd(el, text) {
+  clearEl(el);
+  var html = "";
+  try { html = marked.parse(text || "_no content_"); }
+  catch(e) { el.textContent = text || ""; return; }
+  var frag = document.createRange().createContextualFragment(html);
+  el.appendChild(frag);
+}
+
+function showNode(nodeId) {
+  var node = nodeMap.get(nodeId);
+  if (!node) return;
+  var color = (TYPE_COLOR[node.type] || TYPE_COLOR.unknown).border;
+  document.getElementById("panel-title").textContent = node.title || node.id;
+
+  var meta = document.getElementById("panel-meta");
+  meta.style.display = "block";
+  clearEl(meta);
+  var typeSpan = document.createElement("span");
+  typeSpan.style.color = color;
+  typeSpan.textContent = node.type;
+  meta.appendChild(typeSpan);
+  if (node.tags && node.tags.length) {
+    meta.appendChild(document.createTextNode(" . "));
+    node.tags.forEach(function(t, i) {
+      var code = document.createElement("code");
+      code.textContent = t;
+      if (i > 0) meta.appendChild(document.createTextNode(" "));
+      meta.appendChild(code);
+    });
+  }
+  meta.appendChild(document.createTextNode(" . " + node.degree + " connections"));
+
+  renderMd(document.getElementById("panel-body"), node.body);
+
+  var neighbors = DATA.edges
+    .filter(function(e) { return e.from === nodeId || e.to === nodeId; })
+    .map(function(e) { return {id: e.from === nodeId ? e.to : e.from, weight: e.weight}; })
+    .sort(function(a, b) { return b.weight - a.weight; }).slice(0, 5);
+
+  var relPanel = document.getElementById("panel-related");
+  var relList  = document.getElementById("related-list");
+  if (neighbors.length > 0) {
+    relPanel.style.display = "block";
+    clearEl(relList);
+    neighbors.forEach(function(n) {
+      var nb  = nodeMap.get(n.id);
+      var row = document.createElement("div");
+      row.className = "rel-item";
+      row.onclick = function() { selectNode(n.id); };
+      var nameSpan = document.createElement("span");
+      nameSpan.textContent = nb ? nb.title : n.id;
+      var wtSpan = document.createElement("span");
+      wtSpan.className = "rel-weight";
+      wtSpan.textContent = n.weight.toFixed(2);
+      row.appendChild(nameSpan);
+      row.appendChild(wtSpan);
+      relList.appendChild(row);
+    });
+  } else { relPanel.style.display = "none"; }
+}
+
+window.selectNode = function(nodeId) {
+  network.selectNodes([nodeId]);
+  network.focus(nodeId, {animation: {duration: 600, easingFunction: "easeInOutQuad"}, scale: 1.2});
+  showNode(nodeId);
+};
+
+network.on("click", function(params) {
+  if (params.nodes.length > 0) {
+    showNode(params.nodes[0]);
+  } else {
+    document.getElementById("panel-title").textContent = "Select a node";
+    document.getElementById("panel-meta").style.display = "none";
+    var pb = document.getElementById("panel-body");
+    clearEl(pb);
+    var hint = document.createElement("div");
+    hint.id = "empty-hint";
+    hint.textContent = "Click a node to explore";
+    pb.appendChild(hint);
+    document.getElementById("panel-related").style.display = "none";
+  }
+});
+
+var searchTimeout;
+document.getElementById("search").addEventListener("input", function(e) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(function() {
+    var q = e.target.value.trim().toLowerCase();
+    var updates = DATA.nodes.map(function(n) {
+      var match = !q || n.id.includes(q)
+        || (n.title||"").toLowerCase().includes(q)
+        || (n.tags||[]).some(function(t){return t.includes(q);})
+        || (n.body||"").toLowerCase().includes(q);
+      return {id: n.id, opacity: match ? 1 : 0.07};
+    });
+    nodes.update(updates);
+  }, 200);
+});
+
+document.querySelectorAll("#filters input[type=checkbox]").forEach(function(cb) {
+  cb.addEventListener("change", function() {
+    var hidden = new Set(
+      [].slice.call(document.querySelectorAll("#filters input[type=checkbox]:not(:checked)"))
+        .map(function(c){return c.dataset.type;})
+    );
+    nodes.update(DATA.nodes.map(function(n){return {id:n.id, hidden: hidden.has(n.type||"unknown")};}));
+  });
+});
+
+network.on("stabilizationIterationsDone", function() {
+  network.setOptions({physics: {enabled: false}});
+});
+</script>
+</body>
+</html>
